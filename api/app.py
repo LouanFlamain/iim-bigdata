@@ -88,5 +88,61 @@ def kpis():
     })
 
 
+@app.route("/ml/segments", methods=["GET"])
+def ml_segments():
+    db = get_db()
+    docs = list(db.customer_segments.find())
+    return jsonify([serialize_doc(doc) for doc in docs])
+
+
+@app.route("/ml/segments/summary", methods=["GET"])
+def ml_segments_summary():
+    db = get_db()
+    pipeline = [
+        {
+            "$group": {
+                "_id": "$segment_name",
+                "count": {"$sum": 1},
+                "avg_recency": {"$avg": "$recency"},
+                "avg_frequency": {"$avg": "$frequency"},
+                "avg_monetary": {"$avg": "$monetary"}
+            }
+        },
+        {"$sort": {"avg_monetary": -1}}
+    ]
+    results = list(db.customer_segments.aggregate(pipeline))
+    for r in results:
+        r["segment_name"] = r.pop("_id")
+    return jsonify(results)
+
+
+@app.route("/ml/churn", methods=["GET"])
+def ml_churn():
+    db = get_db()
+    docs = list(db.churn_predictions.find())
+    return jsonify([serialize_doc(doc) for doc in docs])
+
+
+@app.route("/ml/churn/high-risk", methods=["GET"])
+def ml_churn_high_risk():
+    db = get_db()
+    docs = list(db.churn_predictions.find({"churn_risk_level": "High"}))
+    return jsonify([serialize_doc(doc) for doc in docs])
+
+
+@app.route("/ml/clv", methods=["GET"])
+def ml_clv():
+    db = get_db()
+    docs = list(db.clv_predictions.find())
+    return jsonify([serialize_doc(doc) for doc in docs])
+
+
+@app.route("/ml/model-metrics", methods=["GET"])
+def ml_model_metrics():
+    db = get_db()
+    docs = list(db.ml_model_metrics.find())
+    return jsonify([serialize_doc(doc) for doc in docs])
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

@@ -4,8 +4,11 @@ pandas
 pyarrow
 faker
 streamlit
-plotpy
+plotly
 python-dotenv
 pymongo
 flask
 requests
+pandera
+scikit-learn
+joblib
