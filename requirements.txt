@@ -1,0 +1,8 @@
+prefect
+minio
+pandas
+pyarrow
+faker
+streamlit
+plotpy
+python-dotenv
