@@ -76,9 +76,44 @@ services:
       timeout: 10s
       retries: 5
 
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - elt-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: analytics-api
+    ports:
+      - "8000:8000"
+    environment:
+      MONGODB_URI: mongodb://admin:admin@mongodb:27017/
+      MONGODB_DB: analytics
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - elt-network
+
 volumes:
   minio_data:
   prefect_db:
+  mongodb_data:
 
 networks:
   elt-network:

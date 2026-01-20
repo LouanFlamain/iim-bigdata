@@ -6,3 +6,6 @@ faker
 streamlit
 plotpy
 python-dotenv
+pymongo
+flask
+requests
